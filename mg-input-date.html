@@ -1,6 +1,27 @@
+<link rel="import" href="../polymer/polymer.html">
+
 <dom-module id="mg-input-date">
 	<template>
+		<style>
+			input {  
+				-webkit-appearance: none;
+				color: transparent;
+				height: 0px;
+				width: 0px;
+				border: 0;
+				position: absolute;
+			}
+			span {
+				text-align: var(--mg-input-text-align, center);
+				font-size: var(--mg-font-size);
+				display: block;
+			}
+		</style>
 		<div>
+			<input id="mg-input-date" type="date" on-change="_dateSelected" value="{{value}}" />
+			<label for="mg-input-date">
+				<span>{{displayValue}}</span>
+			</label>
 		</div>
 	</template>
 	<script>
@@ -8,7 +29,47 @@
 			is: 'mg-input-date',
 
 			properties: {
-			}
+				value: {
+					type: Date,
+					value: function() {
+						var today = new Date();
+						return today.toISOString().slice(0, 10);
+					},
+					observer: '_valueChanged',
+					notify: true
+				},
+
+				formatter: {
+					type: Function
+				}
+			},
+
+			setFormatter: function(formatter) {
+				this.formatter = formatter;
+			},
+
+			defaultFormatter: function(date) {
+				var year = date.slice(2, 4);
+				var month = date.slice(5, 7);
+				var day = date.slice(8, 10);
+
+				return year + '년 ' + month + '월 ' + day + '일';
+			},
+
+			_dateSelected: function(event) {
+				var date = event.target.value;
+				if(!date) {
+					var today = new Date();
+					date = today.toISOString().slice(0, 10);
+				};
+				
+				this.displayValue = (this.formatter) ? this.formatter(date) : this.defaultFormatter(date);
+			},
+
+			_valueChanged: function(value) {
+				this.$['mg-input-date'].value = value;
+				this.displayValue = (this.formatter) ? this.formatter(value) : this.defaultFormatter(value);
+			},
 		})
 	</script>
 </dom-module>
